@@ -3,16 +3,11 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { UserType } from '@/core/entities/user-type'
 
 export type UserAccountProps = {
-  document: string
   userAccountType: UserType
   balance: number
 }
 
 export class UserAccount extends Entity<UserAccountProps> {
-  getDocument() {
-    return this.props.document
-  }
-
   getUserAccountType() {
     return this.props.userAccountType
   }
