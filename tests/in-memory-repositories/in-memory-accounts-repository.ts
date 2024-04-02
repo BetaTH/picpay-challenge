@@ -11,4 +11,9 @@ export class InMemoryAccountsRepository implements AccountsRepository {
     }
     return userAccount
   }
+
+  async save(account: UserAccount) {
+    const itemIdx = this.items.findIndex((item) => item.id === account.id)
+    this.items[itemIdx] = account
+  }
 }

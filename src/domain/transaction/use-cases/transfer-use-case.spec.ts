@@ -5,15 +5,22 @@ import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { InMemoryAccountsRepository } from 'tests/in-memory-repositories/in-memory-accounts-repository'
 import { InMemoryTransactionsRepository } from 'tests/in-memory-repositories/in-memory-trasactions-repository'
+import { InMemoryUnityOfWork } from 'tests/in-memoy-unit-of-work/unit-of-work'
 
 describe('Transfer Use Case', () => {
   let accountsRepository: InMemoryAccountsRepository
   let transactionsRepository: InMemoryTransactionsRepository
+  let unitOfWork: InMemoryUnityOfWork
   let sut: TransferUseCase
   beforeEach(() => {
     accountsRepository = new InMemoryAccountsRepository()
+    unitOfWork = new InMemoryUnityOfWork()
     transactionsRepository = new InMemoryTransactionsRepository()
-    sut = new TransferUseCase(accountsRepository, transactionsRepository)
+    sut = new TransferUseCase(
+      accountsRepository,
+      transactionsRepository,
+      unitOfWork,
+    )
   })
 
   it('should not be able to transfer if the account type is merchant', async () => {
@@ -105,5 +112,6 @@ describe('Transfer Use Case', () => {
     expect(result.isRight).toBeTruthy()
     expect(accountFrom.getBalance()).toEqual(0)
     expect(accountTo.getBalance()).toEqual(100)
+    expect(transactionsRepository.items).toHaveLength(1)
   })
 })
