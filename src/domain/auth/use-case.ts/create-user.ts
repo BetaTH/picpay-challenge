@@ -1,10 +1,9 @@
 import { Either, left, right } from '@/core/either'
 import { UsersRepository } from '../repositories/users-repositories'
-import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
-import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { User } from '../entities/user'
 import { UserType } from '@/core/entities/user-type'
 import { HashProvider } from '../cryptography/hash-provider'
+import { AlreadyExistsError } from '@/core/errors/errors/already-exists-error'
 
 type RegisterUserUseCaseRequest = {
   firstName: string
@@ -15,7 +14,7 @@ type RegisterUserUseCaseRequest = {
   merchant?: boolean
 }
 
-type RegisterUserUseCaseResponse = Either<ResourceNotFoundError, { user: User }>
+type RegisterUserUseCaseResponse = Either<AlreadyExistsError, { user: User }>
 
 export class RegisterUserUseCase {
   constructor(
@@ -34,12 +33,12 @@ export class RegisterUserUseCase {
     const userByEmail = await this.usersRepository.findByEmail(email)
 
     if (!userByEmail) {
-      return left(new NotAllowedError())
+      return left(new AlreadyExistsError('Email already exists'))
     }
     const userByDocument = await this.usersRepository.findByDocument(document)
 
     if (!userByDocument) {
-      return left(new NotAllowedError())
+      return left(new AlreadyExistsError('Document already exists'))
     }
 
     const passwordHash = await this.hashProvider.generateHash(password)
