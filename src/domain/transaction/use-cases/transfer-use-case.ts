@@ -1,11 +1,11 @@
 import { Either, left, right } from '@/core/either'
 import { AccountsRepository } from '../repositories/accounts-repository'
 import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
-import { UserType } from '@/core/entities/user-type'
 import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { TransactionsRepository } from '../repositories/transactions-repository'
 import { TransferService } from '../services/transferService'
 import { UnitOfWork } from '@/core/unit-of-work/unit-of-work'
+import { TransactionAuthorizationProvider } from '../providers/transaction-authorization-provider'
 
 type TransferUseCaseRequest = {
   accountIdFrom: string
@@ -22,6 +22,7 @@ export class TransferUseCase {
   constructor(
     private accountsRepository: AccountsRepository,
     private transactionsRepository: TransactionsRepository,
+    private transactionAuthorizationProvider: TransactionAuthorizationProvider,
     private unitOfWork: UnitOfWork,
   ) {}
 
@@ -36,11 +37,7 @@ export class TransferUseCase {
       return left(new ResourceNotFoundError())
     }
 
-    if (accountFrom.getUserAccountType() === UserType.MERCHANT) {
-      return left(new NotAllowedError())
-    }
-
-    if (accountFrom.getBalance() < amount) {
+    if (accountFrom.isAbleToTransfer(amount)) {
       return left(new NotAllowedError())
     }
 
@@ -48,6 +45,16 @@ export class TransferUseCase {
 
     if (!accountTo) {
       return left(new ResourceNotFoundError())
+    }
+
+    const isAuthorized =
+      await this.transactionAuthorizationProvider.isAuthorizedToTransfer(
+        accountFrom,
+        accountTo,
+      )
+
+    if (!isAuthorized) {
+      return left(new NotAllowedError())
     }
 
     const transferService = new TransferService()

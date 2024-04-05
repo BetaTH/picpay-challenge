@@ -6,8 +6,8 @@ export class TransferService {
     accountFrom.debit(amount)
     accountTo.credit(amount)
     const transaction = Transaction.create({
-      accountIdFrom: accountFrom.id,
-      accountIdTo: accountTo.id,
+      accountFromId: accountFrom.id,
+      accountToId: accountTo.id,
       amount,
     })
     return { transaction }

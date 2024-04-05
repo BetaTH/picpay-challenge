@@ -2,7 +2,7 @@ import { Either, left, right } from '@/core/either'
 import { UsersRepository } from '../repositories/users-repositories'
 import { User } from '../entities/user'
 import { UserType } from '@/core/entities/user-type'
-import { HashProvider } from '../cryptography/hash-provider'
+import { HashProvider } from '../providers/hash-provider'
 import { AlreadyExistsError } from '@/core/errors/errors/already-exists-error'
 
 type RegisterUserUseCaseRequest = {

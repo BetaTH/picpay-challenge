@@ -1,7 +1,7 @@
 import { Entity } from '@/core/entities/entity'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { UserType } from '@/core/entities/user-type'
-import { HashProvider } from '../cryptography/hash-provider'
+import { HashProvider } from '../providers/hash-provider'
 
 export type UserProps = {
   firstName: string

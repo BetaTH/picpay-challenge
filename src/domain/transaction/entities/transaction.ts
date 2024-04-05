@@ -3,8 +3,8 @@ import { Optional } from '@/core/types/optional'
 import { Entity } from '@/core/entities/entity'
 
 export type TransactionProps = {
-  accountIdFrom: UniqueEntityID
-  accountIdTo: UniqueEntityID
+  accountFromId: UniqueEntityID
+  accountToId: UniqueEntityID
   amount: number
   createdAt: Date
 }

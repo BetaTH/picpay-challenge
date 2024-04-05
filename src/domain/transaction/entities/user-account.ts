@@ -16,12 +16,19 @@ export class UserAccount extends Entity<UserAccountProps> {
     return this.props.balance
   }
 
-  credit(value: number) {
-    this.props.balance += value
+  credit(amount: number) {
+    this.props.balance += amount
   }
 
-  debit(value: number) {
-    this.props.balance -= value
+  debit(amount: number) {
+    this.props.balance -= amount
+  }
+
+  isAbleToTransfer(amount: number): boolean {
+    if (this.props.userAccountType === UserType.MERCHANT) {
+      return false
+    }
+    return this.props.balance < amount
   }
 
   static create(props: UserAccountProps, id?: UniqueEntityID) {
