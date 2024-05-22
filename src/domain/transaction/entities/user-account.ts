@@ -8,11 +8,11 @@ export type UserAccountProps = {
 }
 
 export class UserAccount extends Entity<UserAccountProps> {
-  getUserAccountType() {
+  get userAccountType() {
     return this.props.userAccountType
   }
 
-  getBalance() {
+  get balance() {
     return this.props.balance
   }
 
@@ -25,10 +25,13 @@ export class UserAccount extends Entity<UserAccountProps> {
   }
 
   isAbleToTransfer(amount: number): boolean {
-    if (this.props.userAccountType === UserType.MERCHANT) {
+    if (
+      this.props.userAccountType === UserType.MERCHANT ||
+      this.props.balance < amount
+    ) {
       return false
     }
-    return this.props.balance < amount
+    return true
   }
 
   static create(props: UserAccountProps, id?: UniqueEntityID) {

@@ -4,7 +4,6 @@ import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-e
 import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { TransactionsRepository } from '../repositories/transactions-repository'
 import { TransferService } from '../services/transferService'
-import { UnitOfWork } from '@/core/unit-of-work/unit-of-work'
 import { TransactionAuthorizationProvider } from '../providers/transaction-authorization-provider'
 
 type TransferUseCaseRequest = {
@@ -23,7 +22,6 @@ export class TransferUseCase {
     private accountsRepository: AccountsRepository,
     private transactionsRepository: TransactionsRepository,
     private transactionAuthorizationProvider: TransactionAuthorizationProvider,
-    private unitOfWork: UnitOfWork,
   ) {}
 
   async execute({
@@ -37,7 +35,7 @@ export class TransferUseCase {
       return left(new ResourceNotFoundError())
     }
 
-    if (accountFrom.isAbleToTransfer(amount)) {
+    if (!accountFrom.isAbleToTransfer(amount)) {
       return left(new NotAllowedError())
     }
 
@@ -64,11 +62,9 @@ export class TransferUseCase {
       amount,
     )
 
-    await this.unitOfWork.runInTransaction(async () => {
-      await this.accountsRepository.save(accountFrom)
-      await this.accountsRepository.save(accountTo)
-      await this.transactionsRepository.create(transaction)
-    })
+    await this.accountsRepository.save(accountFrom)
+    await this.accountsRepository.save(accountTo)
+    await this.transactionsRepository.create(transaction)
 
     return right({})
   }

@@ -5,21 +5,22 @@ import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { InMemoryAccountsRepository } from 'tests/in-memory-repositories/in-memory-accounts-repository'
 import { InMemoryTransactionsRepository } from 'tests/in-memory-repositories/in-memory-trasactions-repository'
-import { InMemoryUnityOfWork } from 'tests/in-memoy-unit-of-work/unit-of-work'
+import { TestTransactionAuthorizationProvider } from 'tests/providers/test-transaction-authorization-provider'
 
 describe('Transfer Use Case', () => {
   let accountsRepository: InMemoryAccountsRepository
   let transactionsRepository: InMemoryTransactionsRepository
-  let unitOfWork: InMemoryUnityOfWork
+  let transactionAuthorizationProvider: TestTransactionAuthorizationProvider
   let sut: TransferUseCase
   beforeEach(() => {
     accountsRepository = new InMemoryAccountsRepository()
-    unitOfWork = new InMemoryUnityOfWork()
+    transactionAuthorizationProvider =
+      new TestTransactionAuthorizationProvider()
     transactionsRepository = new InMemoryTransactionsRepository()
     sut = new TransferUseCase(
       accountsRepository,
       transactionsRepository,
-      unitOfWork,
+      transactionAuthorizationProvider,
     )
   })
 
@@ -48,7 +49,7 @@ describe('Transfer Use Case', () => {
       amount: 100,
     })
 
-    expect(result.isLeft).toBeTruthy()
+    expect(result.isLeft).toBe(true)
     expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 
@@ -77,7 +78,7 @@ describe('Transfer Use Case', () => {
       amount: 200,
     })
 
-    expect(result.isLeft).toBeTruthy()
+    expect(result.isLeft).toBe(true)
     expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 
@@ -100,8 +101,8 @@ describe('Transfer Use Case', () => {
     accountsRepository.items.push(accountFrom)
     accountsRepository.items.push(accountTo)
 
-    expect(accountFrom.getBalance()).toEqual(100)
-    expect(accountTo.getBalance()).toEqual(0)
+    expect(accountFrom.balance).toEqual(100)
+    expect(accountTo.balance).toEqual(0)
 
     const result = await sut.execute({
       accountIdFrom: '11111111111',
@@ -110,8 +111,8 @@ describe('Transfer Use Case', () => {
     })
 
     expect(result.isRight).toBeTruthy()
-    expect(accountFrom.getBalance()).toEqual(0)
-    expect(accountTo.getBalance()).toEqual(100)
+    expect(accountFrom.balance).toEqual(0)
+    expect(accountTo.balance).toEqual(100)
     expect(transactionsRepository.items).toHaveLength(1)
   })
 })
