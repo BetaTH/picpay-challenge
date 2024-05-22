@@ -30,15 +30,11 @@ export class RegisterUserUseCase {
     password,
     merchant,
   }: RegisterUserUseCaseRequest): Promise<RegisterUserUseCaseResponse> {
-    const userByEmail = await this.usersRepository.findByEmail(email)
+    const userByEmailOrDocument =
+      await this.usersRepository.findByEmailOrDocument(email, document)
 
-    if (!userByEmail) {
-      return left(new AlreadyExistsError('Email already exists'))
-    }
-    const userByDocument = await this.usersRepository.findByDocument(document)
-
-    if (!userByDocument) {
-      return left(new AlreadyExistsError('Document already exists'))
+    if (userByEmailOrDocument) {
+      return left(new AlreadyExistsError('Already exists'))
     }
 
     const passwordHash = await this.hashProvider.generateHash(password)
